@@ -2,7 +2,7 @@ create user 'todo'@'%' identified by 'todo';
 grant all on *.* to 'todo'@'%';
 flush privileges;
 exit
-mysql -u root -ptodo
+mysql -u todo -ptodo
 create database element_base;
 use element_base;
 create table user(id int unsigned primary key auto_increment,name varchar(40));

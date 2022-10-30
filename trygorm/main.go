@@ -11,9 +11,9 @@ import (
 func init() {
 	logrus.SetLevel(logrus.TraceLevel)
 	logrus.SetReportCaller(true)
+	utils.Init()
 	models.Init()
 }
 func main() {
-	//utils.Router()
 	utils.Router()
 }

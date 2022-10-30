@@ -6,19 +6,13 @@ import (
 	"github.com/jinzhu/gorm"
 	"github.com/sirupsen/logrus"
 	"keys"
-	"log"
-	"strconv"
+	"net/http"
+	"trygorm/app/middleware"
 	"trygorm/models"
+	"trygorm/views"
 )
 
-func Checkerr(err error) {
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
-}
-
-//MySQL create/retrieve/update/delete
+//MySQL create/retrieve/update/deletej
 func CRUD(db *gorm.DB) {
 	//build connect
 	dsn := keys.MySQLdsn + "todo" + keys.DefaultMode
@@ -60,8 +54,10 @@ func CRUD(db *gorm.DB) {
 
 //Task 1.2
 func Router() {
-	db := models.Db
 	router := gin.Default()
+	router.NoRoute(func(c *gin.Context) {
+		c.HTML(http.StatusNotFound, "views/404.html", nil)
+	})
 	router.GET("/ping", func(c *gin.Context) {
 		fmt.Fprintf(c.Writer, "Pong!")
 	}) //output Pong!
@@ -69,159 +65,30 @@ func Router() {
 	r := router.Group("/print")
 	{
 		//print query
-		r.GET("/query", func(c *gin.Context) {
-			id := c.DefaultQuery("id", "233")
-			fmt.Fprintf(c.Writer, id)
-		})
+		r.GET("/query", views.Query)
 		//read body
-		r.POST("/body", func(c *gin.Context) {
-			var to models.Todos
-
-			if err := c.ShouldBind(&to); err != nil {
-				logrus.WithFields(logrus.Fields{"id": to.Id, "name": to.Name, "psw": to.Passwd}).Error("infomation unmatched")
-				c.JSON(200, gin.H{
-					"code": 400,
-					"msg":  "bind corrupt",
-					"data": to,
-				})
-			} else {
-				logrus.WithFields(logrus.Fields{"id": to.Id, "name": to.Name, "psw": to.Passwd}).Info("infomation matched")
-				//db.Create(&to)
-				c.JSON(200, gin.H{
-					"code": 200,
-					"msg":  "bind Successfully",
-					"data": to,
-				})
-			}
-
-		})
+		r.POST("/body", views.PrintBody)
 
 		//request infomation
-		r.GET("/bodyinfo", func(c *gin.Context) {
-			fmt.Fprintln(c.Writer, c.Request.RequestURI)
-			fmt.Fprintln(c.Writer, c.Request.Host)
-			fmt.Fprintln(c.Writer, c.Request.Method)
-			fmt.Fprintln(c.Writer, c.Request.Proto)
-			fmt.Fprintln(c.Writer, c.Request.RemoteAddr)
-			body := c.Request.Body
-			var buffer []byte
-			_, err := body.Read(buffer)
-			if err != nil {
-				logrus.Info("读取数据失败")
-			}
-			fmt.Fprintln(c.Writer, buffer)
-		})
+		r.GET("/bodyinfo", views.PrintBodyInfo)
+	}
+	//login api
+	a := router.Group("/api")
+	{
+		a.POST("/login", Login)
 	}
 	/**router for Todo Api**/
-	m := router.Group("api/todo")
+	m := a.Group("/todo")
+	m.Use(middleware.Authorize())
 	{
-
 		/**find data**/
-		m.GET("/get/:id", func(c *gin.Context) {
-			id, err := strconv.Atoi(c.Param("id"))
-			if err != nil {
-				logrus.Error("transform data corrupt")
-			}
-			uid := uint(id)
-			var datas []models.Todos
-			db.Where("id=?", uid).Find(&datas)
-			if len(datas) == 0 {
-				c.JSON(200, gin.H{
-					"code":    404,
-					"message": "没有查询到数据",
-				})
-			} else {
-				for i := 0; i <= len(datas); i++ {
-					c.JSON(200, gin.H{
-						"code":    200,
-						"message": "查询到数据",
-						"id":      datas[i].Id,
-						"title":   datas[i].Name,
-						"content": datas[i].Passwd,
-					})
-				}
-			}
-		})
+		m.GET("/get/:id/:token", views.Search) //url form:localhost:9090/api/todo/get/id/token
 		/**add data**/
-		m.POST("/add/:id/:name/:psw", func(c *gin.Context) {
-			id, err := strconv.Atoi(c.Param("id"))
-			if err != nil {
-				logrus.Error("transform data corrupt")
-			}
-			uid := uint(id)
-			name := c.Param("name")
-			psw := c.Param("psw")
-			var to models.Todos = models.Todos{
-				uid, name, psw,
-			}
-			if tx := db.Create(&to); tx != nil {
-				c.JSON(200, gin.H{
-					"code":    200,
-					"message": "添加成功",
-					"id":      to.Id,
-				})
-			} else {
-				c.JSON(200, gin.H{
-					"code":    400,
-					"message": "添加失败",
-					"data":    to,
-				})
-			}
-		})
+		m.POST("/add/:id/:name/:psw/:token", views.Add) //url form:localhost:9090/api/todo/add/id/name/psw/token
 		/**delete data**/
-		m.DELETE("/delete/:id", func(c *gin.Context) {
-			var data []models.Todos
-			id, err := strconv.Atoi(c.Param("id"))
-			if err != nil {
-				logrus.Error("transform data corrupt")
-			}
-			uid := uint(id)
-			db.Where("id=?", uid).Find(&data)
-			if len(data) == 0 {
-				c.JSON(200, gin.H{
-					"message": "表中无此数据",
-					"code":    400,
-				})
-			} else {
-				db.Where("id=?", uid).Delete(&data)
-				c.JSON(200, gin.H{
-					"message": "删除成功",
-				})
-			}
-		})
+		m.DELETE("/delete/:id/:token", views.Delete)
 		/**update data**/
-		m.PUT("/update/:id/:name/:psw", func(c *gin.Context) {
-			id, err := strconv.Atoi(c.Param("id"))
-			if err != nil {
-				logrus.Error("transform data corrupt")
-			}
-			uid := uint(id)
-			name := c.Param("name")
-			psw := c.Param("psw")
-			var data []models.Todos
-			db.Where("id=?", uid).Find(&data)
-			if len(data) == 0 {
-				c.JSON(200, gin.H{
-					"message": "表中无此数据",
-					"code":    400,
-				})
-			} else {
-				if tx := db.Where("id=?", uid).Updates(models.Todos{uid, name, psw}); tx != nil {
-					c.JSON(200, gin.H{
-						"code":    200,
-						"message": "修改成功",
-						"data":    data,
-					})
-				} else {
-					c.JSON(200, gin.H{
-						"code":    400,
-						"message": "修改失败",
-						"data":    data,
-					})
-				}
-			}
-		})
-
+		m.PUT("/update/:id/:name/:psw/:token", views.Update)
 	}
 	router.Run(":9090")
 }

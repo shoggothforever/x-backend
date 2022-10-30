@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
@@ -9,6 +8,7 @@ import (
 )
 
 var Db *gorm.DB
+var JwtSecret string
 
 func Init() {
 	//Configure the viper
@@ -26,9 +26,10 @@ func Init() {
 			logrus.Error("found error in config file\n", ok)
 		}
 	}
+	jwtInfo := Config.GetStringMapString("Jwt")
+	JwtSecret = jwtInfo["secret"]
 	loginInfo := Config.GetStringMapString("mysql")
 	Dsn := loginInfo["predsn"] + "todo" + loginInfo["mode"]
-	fmt.Println(Dsn)
 	Db, err = gorm.Open(mysql.Open(Dsn), &gorm.Config{SkipDefaultTransaction: true})
 	if err != nil {
 		logrus.WithFields(logrus.Fields{"error": err}).Error("gorm OPENS MySQL failed")

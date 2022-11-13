@@ -27,6 +27,10 @@ func Auth() gin.HandlerFunc {
 }
 
 //1.5.3 auth middleware
+/*
+@brief check whether user's token are corresponse with the authtoken
+function are not complete because it only sets user as todo
+*/
 func Authorize() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if token := c.Param("token"); token != responses.AuthToken {

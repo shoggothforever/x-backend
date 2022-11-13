@@ -81,9 +81,9 @@ func Router() {
 	m := a.Group("/todo")
 	m.Use(middleware.Authorize())
 	{
-		/**find data**/
+		/**retrieve data**/
 		m.GET("/get/:id/:token", controllers.Search) //url form:localhost:9090/api/todo/get/id/token
-		/**add data**/
+		/**create data**/
 		m.POST("/add/:id/:name/:psw/:token", controllers.Add) //url form:localhost:9090/api/todo/add/id/name/psw/token
 		/**delete data**/
 		m.DELETE("/delete/:id/:token", controllers.Delete)

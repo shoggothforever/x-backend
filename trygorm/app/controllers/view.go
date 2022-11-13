@@ -48,6 +48,9 @@ func PrintBodyInfo(c *gin.Context) {
 	fmt.Fprintln(c.Writer, buffer)
 }
 
+/*
+find data from database
+*/
 func Search(c *gin.Context) {
 	db := models.Db
 	id, err := strconv.Atoi(c.Param("id"))
@@ -72,6 +75,10 @@ func Search(c *gin.Context) {
 		})
 	}
 }
+
+/*
+Create table in database
+*/
 func Add(c *gin.Context) {
 	db := models.Db
 	id, err := strconv.Atoi(c.Param("id"))
@@ -98,6 +105,10 @@ func Add(c *gin.Context) {
 		})
 	}
 }
+
+/*
+delete table accoding to id(only allowed to param)
+*/
 func Delete(c *gin.Context) {
 	db := models.Db
 	var data []models.Todos
@@ -119,6 +130,10 @@ func Delete(c *gin.Context) {
 		})
 	}
 }
+
+/*
+updata table use (only allowed to param)
+*/
 func Update(c *gin.Context) {
 	db := models.Db
 	id, err := strconv.Atoi(c.Param("id"))

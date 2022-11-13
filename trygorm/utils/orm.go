@@ -7,6 +7,8 @@ import (
 	"trygorm/models"
 )
 
+//MySQL create/retrieve/update/deletej
+
 func Tra1(tx *gorm.DB) error {
 	if err := tx.Create(&models.Todos{42, "dump", "end"}).Error; err != nil {
 		logrus.WithFields(logrus.Fields{"Error": err}).Error("创建Todo记录失败")

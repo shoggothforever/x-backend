@@ -10,7 +10,6 @@ import (
 	"trygorm/app/controllers"
 	"trygorm/app/middleware"
 	"trygorm/models"
-	"trygorm/views"
 )
 
 //MySQL create/retrieve/update/deletej
@@ -66,12 +65,12 @@ func Router() {
 	r := router.Group("/print")
 	{
 		//print query
-		r.GET("/query", views.Query)
+		r.GET("/query", controllers.Query)
 		//read body
-		r.POST("/body", views.PrintBody)
+		r.POST("/body", controllers.PrintBody)
 
 		//request infomation
-		r.GET("/bodyinfo", views.PrintBodyInfo)
+		r.GET("/bodyinfo", controllers.PrintBodyInfo)
 	}
 	//login api
 	a := router.Group("/api")
@@ -83,13 +82,13 @@ func Router() {
 	m.Use(middleware.Authorize())
 	{
 		/**find data**/
-		m.GET("/get/:id/:token", views.Search) //url form:localhost:9090/api/todo/get/id/token
+		m.GET("/get/:id/:token", controllers.Search) //url form:localhost:9090/api/todo/get/id/token
 		/**add data**/
-		m.POST("/add/:id/:name/:psw/:token", views.Add) //url form:localhost:9090/api/todo/add/id/name/psw/token
+		m.POST("/add/:id/:name/:psw/:token", controllers.Add) //url form:localhost:9090/api/todo/add/id/name/psw/token
 		/**delete data**/
-		m.DELETE("/delete/:id/:token", views.Delete)
+		m.DELETE("/delete/:id/:token", controllers.Delete)
 		/**update data**/
-		m.PUT("/update/:id/:name/:psw/:token", views.Update)
+		m.PUT("/update/:id/:name/:psw/:token", controllers.Update)
 	}
 	router.Run(":9090")
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"keys"
 	"net/http"
+	"trygorm/app/controllers"
 	"trygorm/app/middleware"
 	"trygorm/models"
 	"trygorm/views"
@@ -75,7 +76,7 @@ func Router() {
 	//login api
 	a := router.Group("/api")
 	{
-		a.POST("/login", Login)
+		a.POST("/login", controllers.Login)
 	}
 	/**router for Todo Api**/
 	m := a.Group("/todo")

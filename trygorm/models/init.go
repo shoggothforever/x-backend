@@ -10,6 +10,12 @@ import (
 var Db *gorm.DB
 var JwtSecret string
 
+/*
+* @brief init the config of viper and database
+set default viper config path and read data from config.yaml
+to get mysql userInfo,jwt secretKey
+open mysql database with gorm and create table with user Struct
+*/
 func Init() {
 	//Configure the viper
 	Config := viper.New()

@@ -4,6 +4,7 @@ import "C"
 import (
 	_ "github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"trygorm/app/controllers"
 	"trygorm/models"
 	"trygorm/utils"
 )
@@ -11,7 +12,7 @@ import (
 func init() {
 	logrus.SetLevel(logrus.TraceLevel)
 	logrus.SetReportCaller(true)
-	utils.Init()
+	controllers.Init()
 	models.Init()
 }
 func main() {

@@ -18,7 +18,7 @@ func Tra1(tx *gorm.DB) error {
 	}
 	return nil
 }
-func Sess(db *gorm.DB) {
+func Sess(db *gorm.DB) { //测试会话
 	tx := db.Session(&gorm.Session{SkipDefaultTransaction: true}) /*.Begin()*/
 	Tra1(tx)
 }
